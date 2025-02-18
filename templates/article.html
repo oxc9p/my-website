@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0xc9p</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="container">
+    <h2>My blog</h2>
+    <section class="projects">
+        <div class="projects-grid">
+            {{range .Articles}}
+            <div class="project">
+                <img src="{{.Image}}" alt="Image">
+                <h3>{{.Title}}</h3>
+                <p>{{.Description}}</p>
+                <div class="project-links">
+                    <a href="{{.WebLink}}/markdown/{{.Id}}" class="btn small-btn">Read more</a>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </section>
+</div>
+</body>
+</html>

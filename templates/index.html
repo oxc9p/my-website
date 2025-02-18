@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0xc9p</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script>
+        function copyDiscord() {
+            const textToCopy = 'oxc9p';
+
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            alert("Username copied to clipboard");
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <header>
+        <img src="{{.WebLink}}/static/images/logo.gif" alt="Logo" class="logo">
+        <h1>Hello, im Paul</h1>
+        <p>Radio electronics engineer, roboticist, developer</p>
+    </header>
+
+    <section class="socials">
+        <h2>My social networks</h2>
+        <div class="buttons">
+            <a href="{{.WebLink}}/blog/" class="btn">Blog</a>
+            <a href="https://github.com/oxc9p" class="btn">GitHub</a>
+            <a onclick="copyDiscord()" class="btn" id="dsc">Discord</a>
+        </div>
+    </section>
+
+    <section class="projects">
+        <h2>Current projects</h2>
+        <div class="projects-grid">
+            <div class="project">
+                <img src="{{.WebLink}}/static/images/MapGenerated.jpeg" alt="Project 1">
+                <h3>Soon</h3>
+                <p>Soon</p>
+                <div class="project-links">
+                    <a href="" class="btn small-btn">Soon</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

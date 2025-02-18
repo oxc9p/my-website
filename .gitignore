@@ -1,0 +1,7 @@
+gorm.db
+myPage
+templates/static/images
+markdown/
+.idea/
+gorm
+.git/
