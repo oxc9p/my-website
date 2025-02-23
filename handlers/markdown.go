@@ -3,12 +3,12 @@ package handlers
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"myPage/convertors"
+	"myPage/tools"
 )
 
 func MarkdownHandler() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		byteArrayChunked, err := convertors.ParseFileToByteArray("markdown/" + c.Params("filename") + ".md")
+		byteArrayChunked, err := tools.ParseFileToByteArray("markdown/" + c.Params("filename") + ".md")
 		if err != nil {
 			fmt.Println(err.Error())
 			return c.Status(500).SendString("Error loading file")
@@ -24,7 +24,7 @@ func MarkdownHandler() fiber.Handler {
 			<link rel="stylesheet" href="/static/style.css">
 		</head>
 		<body>
-			<div class="container">` + string(convertors.MdToHTML(byteArrayChunked)) + `</div></body>
+			<div class="container">` + string(tools.MdToHTML(byteArrayChunked)) + `</div></body>
 		</html>`))
 	}
 }

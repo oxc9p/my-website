@@ -11,7 +11,7 @@ func Init() *gorm.DB {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	e := db.AutoMigrate(&models.Article{})
+	e := db.AutoMigrate(&models.Article{}, &models.User{}, &models.Session{})
 	if e != nil {
 		panic("failed to migrate database")
 	}

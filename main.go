@@ -17,12 +17,19 @@ func main() {
 	app := fiber.New(fiber.Config{
 		Views: engine,
 	})
+
 	app.Static("/static", "./templates/static")
 
-	// Connect handlers using method get
+	// Creating api
+	api := app.Group("/api")
+	api.Post("/login", handlers.LoginHandler(db))
+
+	// Подключение обработчиков с помощью метода get
 	app.Get("/", handlers.IndexHandler())
 	app.Get("/markdown/:filename", handlers.MarkdownHandler())
 	app.Get("/blog", handlers.ArticleHandler(db))
+	app.Get("/dashboard", handlers.DashboardHandler(db))
 
-	log.Fatal(app.Listen(os.Getenv("IP") + ":80"))
+	// Run webpage
+	log.Fatal(app.Listen(os.Getenv("IP") + ":8080"))
 }

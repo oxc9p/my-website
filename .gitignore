@@ -1,7 +1,7 @@
 gorm.db
+run.sh
 myPage
-templates/static/images
+templates/static/images/
 markdown/
 .idea/
-gorm
 .git/
