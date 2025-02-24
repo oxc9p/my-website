@@ -7,7 +7,6 @@ import (
 	"log"
 	"myPage/models"
 	"myPage/tools"
-	"os"
 	"strings"
 	"time"
 )
@@ -126,7 +125,7 @@ func LogoutHandler(db *gorm.DB) fiber.Handler {
 		var session models.Session
 		if err := db.Where("session_id = ?", sessionID).First(&session).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return c.Status(fiber.StatusNotFound).Redirect(os.Getenv("WEB_URL") + "/login")
+				return c.Status(fiber.StatusNotFound).Redirect(tools.WebLink + "/login")
 			} else {
 				// Session search error
 				log.Printf("Error finding session: %v", err)
@@ -155,6 +154,6 @@ func LogoutHandler(db *gorm.DB) fiber.Handler {
 		})
 
 		// Redirect to login page
-		return c.Redirect(os.Getenv("WEB_URL") + "/login")
+		return c.Redirect(tools.WebLink + "/login")
 	}
 }

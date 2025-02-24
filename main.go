@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-
 	db := database.Init()
 	engine := tmpl.New("./templates", ".html")
 
