@@ -54,16 +54,18 @@ func CheckSession(db *gorm.DB, c *fiber.Ctx) (*models.Session, error) {
 	return &session, nil
 }
 
-func IsSessionExist(db *gorm.DB, c *fiber.Ctx) (bool, error) {
-	sessionID := c.Cookies("session_id")
-	if sessionID == "" {
-		return false, fiber.NewError(fiber.StatusUnauthorized, "Session not found")
+func IsSessionExist(db *gorm.DB, c *fiber.Ctx) bool {
+	session, err := CheckSession(db, c)
+	if err != nil || session == nil || db == nil {
+		return false
 	}
 
-	var session models.Session
-	if err := db.First(&session, "session_id = ?", sessionID).Error; err != nil {
-		return false, fiber.NewError(fiber.StatusUnauthorized, "Session is invalid")
+	username := session.UserName
+	var user models.User
+
+	if err := db.First(&user, "username = ?", username).Error; err != nil {
+		return false
 	}
 
-	return true, nil
+	return true
 }

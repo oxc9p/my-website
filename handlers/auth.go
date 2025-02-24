@@ -7,35 +7,40 @@ import (
 	"log"
 	"myPage/models"
 	"myPage/tools"
+	"os"
 	"strings"
 	"time"
 )
 
 func LoginHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		username := c.FormValue("username")
+		password := c.FormValue("password")
+
+		if username == "" || password == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Username and password are required",
+			})
+		}
 
 		var user models.User
-		if err := c.BodyParser(&user); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid request body",
-			})
-		}
-		var enteredPassword = user.Password
-		// Search user by username
-		if err := db.First(&user, "username = ?", user.Username).Error; err != nil {
+		if err := db.First(&user, "username = ?", username).Error; err != nil {
+			if strings.Contains(err.Error(), "record not found") {
+				return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+					"error": "Username does not exist",
+				})
+			}
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "Invalid username or password",
 			})
 		}
 
-		//Checking if the password is correct
-		if tools.CheckPasswordHash(enteredPassword, user.Password) == false {
+		if tools.CheckPasswordHash(password, user.Password) == false {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "Invalid username or password",
 			})
 		}
 
-		// Successfully authenticated
 		if err := tools.CreateSession(db, user, c); err != nil {
 			return err
 		}
@@ -51,14 +56,15 @@ func RegisterHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var user models.User
 
-		// Parse the request body
-		if err := c.BodyParser(&user); err != nil {
+		user.Username = c.FormValue("username")
+		user.Password = c.FormValue("password")
+		user.VisibleName = c.FormValue("visible_name")
+
+		if user.Username == "" || user.Password == "" || user.VisibleName == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid request body",
+				"error": "Username and password and visible name are required",
 			})
 		}
-		// Set the permission after parse
-		user.Permission = 0
 
 		// Validate password length.
 		if len(user.Password) > 72 {
@@ -110,44 +116,45 @@ func LogoutHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		sessionID := c.Cookies("session_id")
 		if sessionID == "" {
+			// If there is no session cookie, return error 401
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Unauthorized",
+				"error": "Unauthorized: Session not found",
 			})
 		}
 
-		// Delete the session from the database
+		// Trying to find a session in the database
 		var session models.Session
 		if err := db.Where("session_id = ?", sessionID).First(&session).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// Session not found, but proceed with clearing cookie
+				return c.Status(fiber.StatusNotFound).Redirect(os.Getenv("WEB_URL") + "/login")
 			} else {
+				// Session search error
 				log.Printf("Error finding session: %v", err)
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"error": "Unable to logout",
+					"error": "Unable to find session",
 				})
 			}
 		}
 
-		// Delete session
-		if err := db.Delete(&session).Error; err != nil {
+		// Deleting a session
+		if err := db.Where("session_id = ?", sessionID).Delete(&models.Session{}).Error; err != nil {
 			log.Printf("Error deleting session: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Internal Server Error",
+				"error": "Unable to delete session",
 			})
 		}
 
-		// Clear the cookie Set expiry to the past
+		// Clearing session cookies
 		c.Cookie(&fiber.Cookie{
 			Name:     "session_id",
 			Value:    "",
-			Expires:  time.Now().Add(-time.Hour),
+			Expires:  time.Now().Add(-time.Hour), // Set the expiration date in the past
 			HTTPOnly: true,
 			Secure:   true,
 			SameSite: fiber.CookieSameSiteLaxMode,
 		})
 
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"message": "Logout successful",
-		}) // Redirect to login after logout
+		// Redirect to login page
+		return c.Redirect(os.Getenv("WEB_URL") + "/login")
 	}
 }

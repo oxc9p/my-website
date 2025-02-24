@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>0xc9p</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="{{.WebLink}}/static/styles.css">
     <script>
         function copyDiscord() {
             const textToCopy = 'oxc9p';
@@ -21,6 +21,22 @@
     </script>
 </head>
 <body>
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-left">
+            <a href="{{.WebLink}}/" class="nav-logo">
+                <img src="{{.WebLink}}/static/images/logo.gif" alt="Logo">
+            </a>
+            <ul class="nav-links">
+                <li><a href="{{.WebLink}}/about">About Me</a></li>
+                <li><a href="{{.WebLink}}/blog">Blog</a></li>
+            </ul>
+        </div>
+        <div class="nav-right">
+            {{if .IsLogin}} <a href="{{.WebLink}}/dashboard" class="btn small-btn">Dashboard</a> {{else}} <a href="{{.WebLink}}/login" class="btn small-btn">Login</a> {{end}}
+        </div>
+    </div>
+</nav>
 <div class="container">
     <header>
         <img src="{{.WebLink}}/static/images/logo.gif" alt="Logo" class="logo">

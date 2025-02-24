@@ -26,11 +26,14 @@ func main() {
 	api.Post("/register", handlers.RegisterHandler(db))
 	api.Post("/logout", handlers.LogoutHandler(db))
 
-	// Подключение обработчиков с помощью метода get
-	app.Get("/", handlers.IndexHandler())
+	// Connecting handlers using the get method
+	app.Get("/", handlers.IndexHandler(db))
 	app.Get("/markdown/:filename", handlers.MarkdownHandler())
 	app.Get("/blog", handlers.ArticleHandler(db))
 	app.Get("/dashboard", handlers.DashboardHandler(db))
+	app.Get("/login", handlers.RenderLoginHandler(db))
+	app.Get("/register", handlers.RenderRegisterHandler(db))
+	app.Get("/logout", handlers.RenderLogoutHandler(db))
 
 	// Run webpage
 	log.Fatal(app.Listen(os.Getenv("IP") + ":8080"))
