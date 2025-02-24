@@ -7,9 +7,9 @@ import (
 )
 
 type Session struct {
-	ID            uint      `gorm:"primaryKey"`
-	SessionID     string    `gorm:"uniqueIndex"`
-	UserID        uuid.UUID `gorm:"not null"`
+	ID            uint      `gorm:"primaryKey;column:id"`
+	SessionID     string    `gorm:"uniqueIndex;column:session_id"`
+	UserID        uuid.UUID `gorm:"not null;column:user_id"`
 	UserName      string    `gorm:"not null"`
 	Authenticated bool      `gorm:"default:false"`
 	CreatedAt     time.Time

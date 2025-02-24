@@ -23,6 +23,8 @@ func main() {
 	// Creating api
 	api := app.Group("/api")
 	api.Post("/login", handlers.LoginHandler(db))
+	api.Post("/register", handlers.RegisterHandler(db))
+	api.Post("/logout", handlers.LogoutHandler(db))
 
 	// Подключение обработчиков с помощью метода get
 	app.Get("/", handlers.IndexHandler())
