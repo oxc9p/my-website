@@ -68,48 +68,78 @@
         </div>
     </div>
 
-    <div class="bottom-row">
-        <div class="card file-list-card">
-            <h2>Uploaded Markdown Files</h2>
-            <ul id="md-file-list" class="file-list">
-                {{range .MarkdownFiles}}
-                <li class="md-element">
-                    <a href="{{$.WebLink}}/users/{{$.Username}}/{{.}}">{{.}}</a>
-                </li>
-                {{end}}
-            </ul>
-            <input type="file" id="upload-md" accept=".md" style="display: none;">
-            <button class="btn small-btn" onclick="document.getElementById('upload-md').click();">Upload New MD File</button>
-            <script>
-                document.getElementById('upload-md').addEventListener('change', function(event) {
-                    const file = event.target.files[0];
-                    if (!file) {
-                        alert('Please, select file.');
-                        return;
-                    }
-
-                    if (file.type !== 'text/markdown') {
-                        alert('Invalid file format.');
-                        return;
-                    }
-
-                    const formData = new FormData();
-                    formData.append('md', file);
-
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', '{{.WebLink}}/api/upload/md');
-                    xhr.onload = function() {
-                        if (xhr.status === 200) {
-                            alert('Markdown uploaded successfully!');
-                        } else {
-                            alert('Error loading image.');
+    {{if .IsWriter}}
+        <div class="bottom-row">
+            <div class="card file-list-card">
+                <h2>Uploaded Markdown Files</h2>
+                <ul id="md-file-list" class="file-list">
+                    {{range .MarkdownFiles}}
+                    <li class="md-element">
+                        <a href="{{$.WebLink}}/users/{{$.Username}}/{{.}}">{{.}}</a>
+                    </li>
+                    {{end}}
+                </ul>
+                <input type="file" id="upload-md" accept=".md" style="display: none;">
+                <button class="btn small-btn" onclick="document.getElementById('upload-md').click();">Upload New MD File</button>
+                <script>
+                    document.getElementById('upload-md').addEventListener('change', function(event) {
+                        const file = event.target.files[0];
+                        if (!file) {
+                            alert('Please, select file.');
+                            return;
                         }
-                    };
-                    xhr.send(formData);
-                });
-            </script>
+
+                        if (file.type !== 'text/markdown') {
+                            alert('Invalid file format.');
+                            return;
+                        }
+
+                        const formData = new FormData();
+                        formData.append('md', file);
+
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', '{{.WebLink}}/api/upload/md');
+                        xhr.onload = function() {
+                            if (xhr.status === 200) {
+                                alert('Markdown uploaded successfully!');
+                            } else {
+                                alert('Error loading image.');
+                            }
+                        };
+                        xhr.send(formData);
+                    });
+                </script>
+            </div>
+            <div class="card add-article-card">
+                <h2>Add New Article</h2>
+                <form action="{{.WebLink}}/api/upload/article" method="post">
+                    <div class="form-group">
+                        <div class="form-group">
+                            <label for="title">Title</label>
+                            <input type="text" id="title" name="title" required>
+                        </div>
+                        <br>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <input type="text" id="description" name="description" required>
+                        </div>
+                        <br>
+                        <div class="form-group">
+                            <label for="image">Image</label>
+                            <input type="text" id="image" name="image" required>
+                        </div>
+                        <br>
+                        <div class="form-group">
+                            <label for="link">Link</label>
+                            <input type="text" id="link" name="link" required>
+                        </div>
+                        <br>
+                        <button type="submit" class="add-article-button">Upload</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
+    {{end}}
 </div>
 </body>
 </html>

@@ -37,7 +37,7 @@ body {
     width: 100%; /* Ensure rows take full width */
 }
 
-.profile-card, .info-card, .image-list-card, .file-list-card {
+.profile-card, .info-card, .add-article-card, .file-list-card {
     background: var(--background);
     border-radius: 10px;
     border: 1px solid var(--border-color);
@@ -56,7 +56,7 @@ body {
     min-width: 250px; /* Minimum width */
 }
 
-.image-list-card, .file-list-card {
+.add-article-card, .file-list-card {
     flex: 1; /*  image and file list take up equal space in the bottom row*/
     min-width: 250px; /* Minimum width */
 }
@@ -192,7 +192,7 @@ button:hover {
     .top-row, .bottom-row {
         flex-direction: column; /* Stack cards vertically on smaller screens */
     }
-    .profile-card, .info-card, .image-list-card, .file-list-card{
+    .profile-card, .info-card, .add-article-card, .file-list-card{
         width: auto; /* Allow cards to take full width */
     }
 }

@@ -26,6 +26,7 @@ func main() {
 	api.Post("/register", handlers.RegisterHandler(db))
 	api.Post("/logout", handlers.LogoutHandler(db))
 	upload := api.Group("/upload")
+	upload.Post("/article", handlers.AddArticle(db))
 	upload.Post("/avatar", handlers.UploadAvatarHandler(db))
 	upload.Post("/image", handlers.UploadImageHandler(db))
 	upload.Post("/md", handlers.UploadMdHandler(db))
