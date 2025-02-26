@@ -18,12 +18,14 @@ func main() {
 	})
 
 	app.Static("/static", "./templates/static")
+	app.Static("/userfiles", "./userfiles")
 
 	// Creating api
 	api := app.Group("/api")
 	api.Post("/login", handlers.LoginHandler(db))
 	api.Post("/register", handlers.RegisterHandler(db))
 	api.Post("/logout", handlers.LogoutHandler(db))
+	api.Post("/upload", handlers.UploadImageHandler(db))
 
 	// Connecting handlers using the get method
 	app.Get("/", handlers.IndexHandler(db))

@@ -1,9 +1,11 @@
 package database
 
 import (
+	"errors"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"myPage/models"
+	"strings"
 )
 
 func Init() *gorm.DB {
@@ -26,4 +28,24 @@ func GetArticles(db *gorm.DB) []models.Article {
 	var articles []models.Article
 	db.Find(&articles)
 	return articles
+}
+
+// FindUserByUsername retrieves a user from the database by username.
+func FindUserByUsername(db *gorm.DB, username string) (models.User, error) {
+	var user models.User
+	if err := db.First(&user, "username = ?", username).Error; err != nil {
+		return user, err
+	}
+	return user, nil
+}
+
+// CreateUser creates a new user in the database.
+func CreateUser(db *gorm.DB, user *models.User) error {
+	if err := db.Create(user).Error; err != nil {
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+			return errors.New("username already exists")
+		}
+		return errors.New("unable to create user")
+	}
+	return nil
 }

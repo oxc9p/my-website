@@ -12,6 +12,7 @@ func ArticleHandler(db *gorm.DB) fiber.Handler {
 		return c.Render("article", fiber.Map{
 			"WebLink":  tools.WebLink,
 			"Articles": database.GetArticles(db),
+			"IsLogin":  tools.IsSessionExist(db, c),
 		})
 	}
 }

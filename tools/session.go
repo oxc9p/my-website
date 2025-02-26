@@ -69,3 +69,32 @@ func IsSessionExist(db *gorm.DB, c *fiber.Ctx) bool {
 
 	return true
 }
+
+// RenderWithSessionCheck renders a template based on session existence.  It takes
+// the db, context, template name, and a variadic map for additional data.
+func RenderWithSessionCheck(db *gorm.DB, c *fiber.Ctx, renderPage string, requireSession bool, extraData ...fiber.Map) error {
+	data := fiber.Map{
+		"WebLink": WebLink,
+	}
+
+	if len(extraData) > 0 {
+		for k, v := range extraData[0] {
+			data[k] = v
+		}
+	}
+
+	sessionExists := IsSessionExist(db, c)
+
+	if requireSession {
+		if !sessionExists {
+			return c.Redirect(WebLink)
+		}
+		return c.Render(renderPage, data)
+	}
+
+	if sessionExists {
+		return c.Redirect(WebLink)
+	}
+
+	return c.Render(renderPage, data)
+}

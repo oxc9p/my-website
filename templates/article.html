@@ -7,6 +7,22 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-left">
+            <a href="{{.WebLink}}/" class="nav-logo">
+                <img src="{{.WebLink}}/static/images/logo.gif" alt="Logo">
+            </a>
+            <ul class="nav-links">
+                <li><a href="{{.WebLink}}/about">About Me</a></li>
+                <li><a href="{{.WebLink}}/blog">Blog</a></li>
+            </ul>
+        </div>
+        <div class="nav-right">
+            {{if .IsLogin}} <a href="{{.WebLink}}/dashboard" class="btn small-btn">Dashboard</a> {{else}} <a href="{{.WebLink}}/login" class="btn small-btn">Login</a> {{end}}
+        </div>
+    </div>
+</nav>
 <div class="container">
     <h2>My blog</h2>
     <section class="projects">

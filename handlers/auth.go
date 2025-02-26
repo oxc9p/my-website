@@ -2,158 +2,152 @@ package handlers
 
 import (
 	"errors"
-	"github.com/gofiber/fiber/v2"
-	"gorm.io/gorm"
+	"fmt"
 	"log"
+	"myPage/database"
 	"myPage/models"
 	"myPage/tools"
 	"strings"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
+// LoginHandler handles user login.
 func LoginHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		username := c.FormValue("username")
 		password := c.FormValue("password")
 
-		if username == "" || password == "" {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Username and password are required",
-			})
+		if err := tools.ValidateCredentials(username, password); err != nil {
+			return tools.HandleUserError(c, fiber.StatusBadRequest, err.Error())
 		}
 
-		var user models.User
-		if err := db.First(&user, "username = ?", username).Error; err != nil {
+		user, err := database.FindUserByUsername(db, username)
+		if err != nil {
 			if strings.Contains(err.Error(), "record not found") {
-				return c.Status(fiber.StatusConflict).JSON(fiber.Map{
-					"error": "Username does not exist",
-				})
+				return tools.HandleUserError(c, fiber.StatusConflict, "Username does not exist")
 			}
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid username or password",
-			})
+			return tools.HandleUserError(c, fiber.StatusUnauthorized, "Invalid username or password")
 		}
 
-		if tools.CheckPasswordHash(password, user.Password) == false {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid username or password",
-			})
+		if !tools.CheckPasswordHash(password, user.Password) {
+			return tools.HandleUserError(c, fiber.StatusUnauthorized, "Invalid username or password")
 		}
 
 		if err := tools.CreateSession(db, user, c); err != nil {
 			return err
 		}
 
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"message":  "Login successful",
-			"username": user.Username,
-		})
+		return c.Status(fiber.StatusCreated).Redirect(tools.WebLink + "/dashboard")
 	}
 }
 
+// RegisterHandler handles user registration.
 func RegisterHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var user models.User
-
 		user.Username = c.FormValue("username")
 		user.Password = c.FormValue("password")
-		user.VisibleName = c.FormValue("visible_name")
 
-		if user.Username == "" || user.Password == "" || user.VisibleName == "" {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Username and password and visible name are required",
-			})
+		if err := tools.ValidateCredentials(user.Username, user.Password); err != nil {
+			return tools.HandleUserError(c, fiber.StatusBadRequest, err.Error())
 		}
 
-		// Validate password length.
-		if len(user.Password) > 72 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Password is too long, the length must not exceed 72 characters",
-			})
-		}
-		if len(user.Password) < 8 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Password is too short, must be at least 8 characters",
-			})
-		}
-
-		// Hash the password
 		hashedPassword, err := tools.HashPassword(user.Password)
 		if err != nil {
 			log.Printf("Error hashing password: %v", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Unable to hash password",
-			})
+			return tools.HandleUserError(c, fiber.StatusInternalServerError, "Unable to hash password")
 		}
 		user.Password = hashedPassword
 
-		// Create the user
-		if err := db.Create(&user).Error; err != nil {
-			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-				return c.Status(fiber.StatusConflict).JSON(fiber.Map{
-					"error": "Username already exists",
-				})
-			}
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Unable to create user",
-			})
+		if err := database.CreateUser(db, &user); err != nil {
+			return tools.HandleUserError(c, fiber.StatusConflict, err.Error())
+
 		}
 
 		// Create a session
 		if err := tools.CreateSession(db, user, c); err != nil {
 			return err
 		}
+		tools.CreateDirectories(user.Username)
 
-		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-			"message":  "Registration successful",
-			"username": user.Username,
-		})
+		return c.Status(fiber.StatusCreated).Redirect(tools.WebLink + "/dashboard")
 	}
 }
 
+// handleSessionRetrieval retrieves and validates a session, handling errors appropriately.
+func handleSessionRetrieval(db *gorm.DB, c *fiber.Ctx) (models.Session, error) {
+	sessionID := c.Cookies("session_id")
+	if sessionID == "" {
+		return models.Session{}, errors.New("unauthorized: Session not found")
+	}
+
+	var session models.Session
+	if err := db.Where("session_id = ?", sessionID).First(&session).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return models.Session{}, err // Return the error directly for 404
+		}
+		log.Printf("Error finding session: %v", err)
+		return models.Session{}, fmt.Errorf("unable to find session")
+	}
+	return session, nil
+}
+
+// LogoutHandler handles user logout.
 func LogoutHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		sessionID := c.Cookies("session_id")
-		if sessionID == "" {
-			// If there is no session cookie, return error 401
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Unauthorized: Session not found",
-			})
-		}
-
-		// Trying to find a session in the database
-		var session models.Session
-		if err := db.Where("session_id = ?", sessionID).First(&session).Error; err != nil {
+		session, err := handleSessionRetrieval(db, c)
+		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
+				// If session is not found, redirect to login
 				return c.Status(fiber.StatusNotFound).Redirect(tools.WebLink + "/login")
-			} else {
-				// Session search error
-				log.Printf("Error finding session: %v", err)
-				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"error": "Unable to find session",
-				})
 			}
+			// For other errors, return 500
+			return tools.HandleUserError(c, fiber.StatusInternalServerError, err.Error())
 		}
-
 		// Deleting a session
-		if err := db.Where("session_id = ?", sessionID).Delete(&models.Session{}).Error; err != nil {
+		if err := db.Where("session_id = ?", session.SessionID).Delete(&models.Session{}).Error; err != nil {
 			log.Printf("Error deleting session: %v", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Unable to delete session",
-			})
+			return tools.HandleUserError(c, fiber.StatusInternalServerError, "Unable to delete session")
 		}
 
 		// Clearing session cookies
-		c.Cookie(&fiber.Cookie{
-			Name:     "session_id",
-			Value:    "",
-			Expires:  time.Now().Add(-time.Hour), // Set the expiration date in the past
-			HTTPOnly: true,
-			Secure:   true,
-			SameSite: fiber.CookieSameSiteLaxMode,
-		})
+		clearSessionCookie(c)
 
 		// Redirect to login page
 		return c.Redirect(tools.WebLink + "/login")
+	}
+}
+
+// clearSessionCookie clears the session cookie.
+func clearSessionCookie(c *fiber.Ctx) {
+	c.Cookie(&fiber.Cookie{
+		Name:     "session_id",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour), // Set the expiration date in the past
+		HTTPOnly: true,
+		Secure:   true,
+		SameSite: fiber.CookieSameSiteLaxMode,
+	})
+}
+
+func RenderLoginHandler(db *gorm.DB) fiber.Handler {
+
+	return func(c *fiber.Ctx) error {
+		return tools.RenderWithSessionCheck(db, c, "login", false)
+	}
+}
+
+func RenderRegisterHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		return tools.RenderWithSessionCheck(db, c, "register", false)
+	}
+}
+
+func RenderLogoutHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		return tools.RenderWithSessionCheck(db, c, "logout", true)
 	}
 }

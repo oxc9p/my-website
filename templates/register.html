@@ -7,16 +7,27 @@
     <link rel="stylesheet" href="{{.WebLink}}/static/styles.css">
 </head>
 <body>
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-left">
+            <a href="{{.WebLink}}/" class="nav-logo">
+                <img src="{{.WebLink}}/static/images/logo.gif" alt="Logo">
+            </a>
+            <ul class="nav-links">
+                <li><a href="{{.WebLink}}/about">About Me</a></li>
+                <li><a href="{{.WebLink}}/blog">Blog</a></li>
+            </ul>
+        </div>
+        <div class="nav-right">
+        </div>
+    </div>
+</nav>
     <div class="login-container">
         <h1>Register</h1>
         <form class="login-form" action="{{.WebLink}}/api/register" method="post">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="visible_name">Visible Name</label>
-                <input id="visible_name" name="visible_name" required>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>

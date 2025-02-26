@@ -3,5 +3,6 @@ run.sh
 myPage
 templates/static/images/
 markdown/
+userfiles/
 .idea/
 .git/

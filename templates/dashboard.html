@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Dashboard</title>
+    <link rel="stylesheet" href="{{.WebLink}}/static/styles.css">
+    <link rel="stylesheet" href="{{.WebLink}}/static/dashboard.css">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-left">
+            <a href="{{.WebLink}}/" class="nav-logo">
+                <img src="{{.WebLink}}/static/images/logo.gif" alt="Logo">
+            </a>
+            <ul class="nav-links">
+                <li><a href="{{.WebLink}}/about">About Me</a></li>
+                <li><a href="{{.WebLink}}/blog">Blog</a></li>
+            </ul>
+        </div>
+        <div class="nav-right">
+            <a href="{{.WebLink}}/logout" class="btn small-btn">Logout</a>
+        </div>
+    </div>
+</nav>
+<div class="dashboard-container">
+    <div class="profile-card">
+        <img src="{{.WebLink}}/{{.Image}}" alt="Avatar" class="avatar">
+        <h2>{{.Username}}</h2>
+        <p>Account created: {{.DateCreated}}</p>
+        <div id="modal" class="modal">
+            <div class="modal-header">
+                <h1>Change avatar</h1>
+                <button id="closeModalBtn" class="btn small-btn">&times;</button>
+            </div>
+
+            <div class="modal-content">
+                <div class="upload-image" onclick="onUploadAreaClick()">
+                    <label for="imageInput">
+                        Select Avatar
+                        <input type="file" id="imageInput" accept="image/jpeg" style="display: none;">
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="uploadButton" class="btn small-btn">Upload Avatar</button>
+            </div>
+        </div>
+        <button id="openModalBtn" class="btn small-btn">Change Avatar</button>
+        <script>
+            function onUploadAreaClick() {
+                document.getElementById('imageInput').click();
+            }
+            function openModal() {
+
+                document.getElementById('modal').style.display = 'block';
+
+            }
+
+            function closeModal() {
+
+                document.getElementById('modal').style.display = 'none';
+
+            }
+
+            document.getElementById('openModalBtn').addEventListener('click', openModal);
+
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+
+            window.addEventListener('click', function(event) {
+
+                if (event.target === document.getElementById('modal')) {
+
+                    closeModal();
+
+                }
+
+            });
+
+            window.addEventListener('beforeunload', function(event) {
+
+                if (document.getElementById('modal').style.display === 'block') {
+
+                    closeModal();
+
+                }
+
+            });
+            document.getElementById('uploadButton').addEventListener('click', function() {
+                const fileInput = document.getElementById('imageInput');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    alert('Please, select file.');
+                    return;
+                }
+
+                if (file.type !== 'image/jpeg') {
+                    alert('Invalid file format. .jpg required');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '{{.WebLink}}/api/upload');
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        alert('Image uploaded successfully!');
+                    } else {
+                        alert('Error loading image.');
+                    }
+                };
+                xhr.send(formData);
+            });
+        </script>
+    </div>
+    <div class="info-card">
+        <h2>Information</h2>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.</p>
+    </div>
+</div>
+</body>
+</html>

@@ -3,6 +3,7 @@ package tools
 import (
 	"errors"
 	"fmt"
+	"github.com/gofiber/fiber/v2"
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
@@ -61,4 +62,25 @@ func MdToHTML(md []byte) []byte {
 	renderer := html.NewRenderer(opts)
 
 	return markdown.Render(doc, renderer)
+}
+
+func RenderMd(c *fiber.Ctx, path string) error {
+	byteArrayChunked, err := ParseFileToByteArray(path)
+	if err != nil {
+		fmt.Println(err.Error())
+		return c.Status(500).SendString("Error loading file")
+	}
+	c.Set("Content-Type", "text/html; charset=utf-8")
+	return c.Send([]byte(`
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>Markdown</title>
+			<link rel="stylesheet" href="/static/style.css">
+		</head>
+		<body>
+			<div class="container">` + string(MdToHTML(byteArrayChunked)) + `</div></body>
+		</html>`))
 }
