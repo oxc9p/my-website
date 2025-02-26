@@ -25,101 +25,90 @@
     </div>
 </nav>
 <div class="dashboard-container">
-    <div class="profile-card">
-        <img src="{{.WebLink}}/{{.Image}}" alt="Avatar" class="avatar">
-        <h2>{{.Username}}</h2>
-        <p>Account created: {{.DateCreated}}</p>
-        <div id="modal" class="modal">
-            <div class="modal-header">
-                <h1>Change avatar</h1>
-                <button id="closeModalBtn" class="btn small-btn">&times;</button>
-            </div>
-
-            <div class="modal-content">
-                <div class="upload-image" onclick="onUploadAreaClick()">
-                    <label for="imageInput">
-                        Select Avatar
-                        <input type="file" id="imageInput" accept="image/jpeg" style="display: none;">
-                    </label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="uploadButton" class="btn small-btn">Upload Avatar</button>
-            </div>
-        </div>
-        <button id="openModalBtn" class="btn small-btn">Change Avatar</button>
-        <script>
-            function onUploadAreaClick() {
-                document.getElementById('imageInput').click();
-            }
-            function openModal() {
-
-                document.getElementById('modal').style.display = 'block';
-
-            }
-
-            function closeModal() {
-
-                document.getElementById('modal').style.display = 'none';
-
-            }
-
-            document.getElementById('openModalBtn').addEventListener('click', openModal);
-
-            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-
-            window.addEventListener('click', function(event) {
-
-                if (event.target === document.getElementById('modal')) {
-
-                    closeModal();
-
-                }
-
-            });
-
-            window.addEventListener('beforeunload', function(event) {
-
-                if (document.getElementById('modal').style.display === 'block') {
-
-                    closeModal();
-
-                }
-
-            });
-            document.getElementById('uploadButton').addEventListener('click', function() {
-                const fileInput = document.getElementById('imageInput');
-                const file = fileInput.files[0];
-
-                if (!file) {
-                    alert('Please, select file.');
-                    return;
-                }
-
-                if (file.type !== 'image/jpeg') {
-                    alert('Invalid file format. .jpg required');
-                    return;
-                }
-
-                const formData = new FormData();
-                formData.append('image', file);
-
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', '{{.WebLink}}/api/upload');
-                xhr.onload = function() {
-                    if (xhr.status === 200) {
-                        alert('Image uploaded successfully!');
-                    } else {
-                        alert('Error loading image.');
+    <div class="top-row">
+        <div class="profile-card">
+            <img src="{{.WebLink}}/{{.Image}}" alt="Avatar" class="avatar">
+            <h2>{{.Username}}</h2>
+            <p>Account created: {{.DateCreated}}</p>
+            <input type="file" id="openModalBtn" class="btn small-btn" accept="image/*" style="display: none;">
+            <button  onclick="document.getElementById('openModalBtn').click();">Upload new avatar</button>
+            <script>
+                document.getElementById('openModalBtn').addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+                    if (!file) {
+                        alert('Please, select file.');
+                        return;
                     }
-                };
-                xhr.send(formData);
-            });
-        </script>
+
+                    if (file.type !== 'image/') {
+                        alert('Invalid file format.');
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('avatar', file);
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '{{.WebLink}}/api/upload/avatar');
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            alert('Avatar uploaded successfully!');
+                        } else {
+                            alert('Error loading image.');
+                        }
+                    };
+                    xhr.send(formData);
+                });
+            </script>
+        </div>
+
+        <div class="info-card">
+            <h2>Information</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.</p>
+        </div>
     </div>
-    <div class="info-card">
-        <h2>Information</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.</p>
+
+    <div class="bottom-row">
+        <div class="card file-list-card">
+            <h2>Uploaded Markdown Files</h2>
+            <ul id="md-file-list" class="file-list">
+                {{range .MarkdownFiles}}
+                <li class="md-element">
+                    <a href="{{$.WebLink}}/users/{{$.Username}}/{{.}}">{{.}}</a>
+                </li>
+                {{end}}
+            </ul>
+            <input type="file" id="upload-md" accept=".md" style="display: none;">
+            <button class="btn small-btn" onclick="document.getElementById('upload-md').click();">Upload New MD File</button>
+            <script>
+                document.getElementById('upload-md').addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+                    if (!file) {
+                        alert('Please, select file.');
+                        return;
+                    }
+
+                    if (file.type !== 'text/markdown') {
+                        alert('Invalid file format.');
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('md', file);
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '{{.WebLink}}/api/upload/md');
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            alert('Markdown uploaded successfully!');
+                        } else {
+                            alert('Error loading image.');
+                        }
+                    };
+                    xhr.send(formData);
+                });
+            </script>
+        </div>
     </div>
 </div>
 </body>
