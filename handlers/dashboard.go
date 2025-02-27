@@ -36,12 +36,18 @@ func DashboardHandler(db *gorm.DB) fiber.Handler {
 			isWriter = true
 		}
 
+		isAdmin := false
+		if user.Permission > 1 {
+			isAdmin = true
+		}
+
 		return tools.RenderWithSessionCheck(db, c, "dashboard", true, fiber.Map{
 			"Username":      user.Username,
 			"Image":         user.Image,
 			"DateCreated":   user.DateCreated.Format("2006-01-02"),
 			"WebLink":       tools.WebLink,
 			"IsWriter":      isWriter,
+			"IsAdmin":       isAdmin,
 			"MarkdownFiles": files,
 		})
 	}
@@ -113,7 +119,7 @@ func handleMdUpload(c *fiber.Ctx, user *models.User) error {
 	return c.Status(fiber.StatusOK).SendString("Markdown uploaded successfully")
 }
 
-func AddArticle(db *gorm.DB) fiber.Handler {
+func UploadArticleHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		user, err := tools.AuthenticateAndGetUser(db, c)
 		if err != nil {
@@ -132,5 +138,26 @@ func AddArticle(db *gorm.DB) fiber.Handler {
 		}
 		database.CreateArticle(db, article)
 		return c.Status(fiber.StatusOK).SendString("Article added successfully")
+	}
+}
+
+func UploadProjectHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		user, err := tools.AuthenticateAndGetUser(db, c)
+		if err != nil {
+			return err
+		}
+		if user.Permission != 2 {
+			return c.Status(fiber.StatusUnauthorized).Redirect(tools.WebLink + "/dashboard")
+		}
+		project := models.Project{
+			Image:       c.FormValue("image"),
+			Title:       c.FormValue("title"),
+			Description: c.FormValue("description"),
+			Label:       c.FormValue("label"),
+			Link:        c.FormValue("link"),
+		}
+		database.CreateProject(db, project)
+		return c.Status(fiber.StatusOK).SendString("Project added successfully")
 	}
 }

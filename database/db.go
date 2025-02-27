@@ -13,7 +13,7 @@ func Init() *gorm.DB {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	e := db.AutoMigrate(&models.Article{}, &models.User{}, &models.Session{})
+	e := db.AutoMigrate(&models.Article{}, &models.User{}, &models.Session{}, &models.Project{})
 	if e != nil {
 		panic("failed to migrate database")
 	}
@@ -28,6 +28,16 @@ func GetArticles(db *gorm.DB) []models.Article {
 	var articles []models.Article
 	db.Find(&articles)
 	return articles
+}
+
+func CreateProject(db *gorm.DB, project models.Project) {
+	db.Create(project)
+}
+
+func GetProjects(db *gorm.DB) []models.Project {
+	var projects []models.Project
+	db.Find(&projects)
+	return projects
 }
 
 // FindUserByUsername retrieves a user from the database by username.

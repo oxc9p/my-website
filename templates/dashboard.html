@@ -138,7 +138,43 @@
                     </div>
                 </form>
             </div>
+
         </div>
+    {{end}}
+    {{if .IsAdmin}}
+    <div class="card add-article-card">
+        <h2>Add New Project</h2>
+        <form action="{{$.WebLink}}/api/upload/project" method="post">
+            <div class="form-group">
+                <div class="form-group">
+                    <label for="projectTitle">Title</label>
+                    <input type="text" id="projectTitle" name="title" required>
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="projectDescription">Description</label>
+                    <input type="text" id="projectDescription" name="description" required>
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="projectImage">Image</label>
+                    <input type="text" id="projectImage" name="image" required>
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="projectLabel">Label</label>
+                    <input type="text" id="projectLabel" name="label" required>
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="projectLink">Link</label>
+                    <input type="text" id="projectLink" name="link" required>
+                </div>
+                <br>
+                <button type="submit" class="add-article-button">Upload</button>
+            </div>
+        </form>
+    </div>
     {{end}}
 </div>
 </body>

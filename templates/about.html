@@ -39,38 +39,19 @@
 </nav>
 <div class="container">
     <header>
-        <h1>Projects</h1>
+        <img src="{{.WebLink}}/static/images/logo.gif" alt="Logo" class="logo">
+        <h1>Hello, im Paul</h1>
+        <p>Radio electronics engineer, roboticist, developer</p>
     </header>
-    <section class="projects">
-        <div class="projects-grid">
-            <div class="project">
-                <img src="{{.WebLink}}/static/images/MapGenerated.jpeg" alt="Project 1">
-                <h3>Soon</h3>
-                <p>Soon</p>
-                <div class="project-links">
-                    <a href="" class="btn small-btn">Soon</a>
-                </div>
-            </div>
-            <div class="project">
-                <img src="{{.WebLink}}/static/images/MapGenerated.jpeg" alt="Project 1">
-                <h3>Soon</h3>
-                <p>Soon</p>
-                <div class="project-links">
-                    <a href="" class="btn small-btn">Soon</a>
-                </div>
-            </div>
-            <div class="project">
-                <img src="{{.WebLink}}/static/images/MapGenerated.jpeg" alt="Project 1">
-                <h3>Soon</h3>
-                <p>Soon</p>
-                <div class="project-links">
-                    <a href="" class="btn small-btn">Soon</a>
-                </div>
-            </div>
+
+    <section class="socials">
+        <h2>My social networks</h2>
+        <div class="buttons">
+            <a href="{{.WebLink}}/blog/" class="btn">Blog</a>
+            <a href="https://github.com/oxc9p" class="btn">GitHub</a>
+            <a onclick="copyDiscord()" class="btn" id="dsc">Discord</a>
         </div>
     </section>
-
-
 </div>
 </body>
 </html>

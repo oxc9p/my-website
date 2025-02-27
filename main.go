@@ -26,10 +26,11 @@ func main() {
 	api.Post("/register", handlers.RegisterHandler(db))
 	api.Post("/logout", handlers.LogoutHandler(db))
 	upload := api.Group("/upload")
-	upload.Post("/article", handlers.AddArticle(db))
+	upload.Post("/article", handlers.UploadArticleHandler(db))
 	upload.Post("/avatar", handlers.UploadAvatarHandler(db))
 	upload.Post("/image", handlers.UploadImageHandler(db))
 	upload.Post("/md", handlers.UploadMdHandler(db))
+	upload.Post("/project", handlers.UploadProjectHandler(db))
 
 	// Connecting handlers using the get method
 	app.Get("/", handlers.IndexHandler(db))
@@ -39,6 +40,8 @@ func main() {
 	app.Get("/login", handlers.RenderLoginHandler(db))
 	app.Get("/register", handlers.RenderRegisterHandler(db))
 	app.Get("/logout", handlers.RenderLogoutHandler(db))
+	app.Get("/about", handlers.AboutHandler(db))
+
 	users := app.Group("/users")
 	users.Get("/:username/:filename", handlers.UserMarkdownHandler())
 
