@@ -184,7 +184,10 @@ button:hover {
 
 .md-element {
     display: flex;
-    flex-wrap: nowrap; /* Запрещаем перенос элементов */
+    justify-content: flex-start;
+}
+.md-element a {
+    margin-top: 10px;
 }
 
 /* Responsive adjustments */

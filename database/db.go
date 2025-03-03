@@ -20,24 +20,13 @@ func Init() *gorm.DB {
 	return db
 }
 
-func CreateArticle(db *gorm.DB, article models.Article) {
-	db.Create(&article)
+func Create[T any](db *gorm.DB, model *T) {
+	db.Create(&model)
 }
 
-func GetArticles(db *gorm.DB) []models.Article {
-	var articles []models.Article
-	db.Find(&articles)
-	return articles
-}
-
-func CreateProject(db *gorm.DB, project models.Project) {
-	db.Create(project)
-}
-
-func GetProjects(db *gorm.DB) []models.Project {
-	var projects []models.Project
-	db.Find(&projects)
-	return projects
+func Get[T any](db *gorm.DB, items *[]T) []T {
+	db.Find(items)
+	return *items
 }
 
 // FindUserByUsername retrieves a user from the database by username.

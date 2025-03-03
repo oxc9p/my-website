@@ -86,6 +86,27 @@ func UploadMdHandler(db *gorm.DB) fiber.Handler {
 	}
 }
 
+func DeleteMdHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		user, err := tools.AuthenticateAndGetUser(db, c)
+		if err != nil {
+			return err
+		}
+		return handleMdDelete(c, user)
+	}
+}
+
+func DeleteImageHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		user, err := tools.AuthenticateAndGetUser(db, c)
+		if err != nil {
+			return err
+		}
+
+		return handleImageDelete(c, user)
+	}
+}
+
 func handleAvatarUpload(c *fiber.Ctx, db *gorm.DB, user *models.User) error {
 	filePath, err := tools.UploadFile(c, user, "avatar", tools.FileInfo{FileDir: "img", FileExtension: []string{".jpg", ".jpeg", ".png"}})
 	if err != nil {
@@ -119,6 +140,21 @@ func handleMdUpload(c *fiber.Ctx, user *models.User) error {
 	return c.Status(fiber.StatusOK).SendString("Markdown uploaded successfully")
 }
 
+func handleMdDelete(c *fiber.Ctx, user *models.User) error {
+	if err := tools.DeleteFile(c, user, "md"); err != nil {
+		log.Println(err)
+		return err
+	}
+	return c.Status(fiber.StatusOK).SendString("Markdown removed successfully")
+}
+
+func handleImageDelete(c *fiber.Ctx, user *models.User) error {
+	if err := tools.DeleteFile(c, user, "img"); err != nil {
+		return err
+	}
+	return c.Status(fiber.StatusOK).SendString("Image removed successfully")
+}
+
 func UploadArticleHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		user, err := tools.AuthenticateAndGetUser(db, c)
@@ -136,7 +172,7 @@ func UploadArticleHandler(db *gorm.DB) fiber.Handler {
 			Author:      user.Username,
 			Id:          uuid.NewString(),
 		}
-		database.CreateArticle(db, article)
+		database.Create(db, &article)
 		return c.Status(fiber.StatusOK).SendString("Article added successfully")
 	}
 }
@@ -157,7 +193,7 @@ func UploadProjectHandler(db *gorm.DB) fiber.Handler {
 			Label:       c.FormValue("label"),
 			Link:        c.FormValue("link"),
 		}
-		database.CreateProject(db, project)
+		database.Create(db, &project)
 		return c.Status(fiber.StatusOK).SendString("Project added successfully")
 	}
 }

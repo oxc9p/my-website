@@ -31,6 +31,9 @@ func main() {
 	upload.Post("/image", handlers.UploadImageHandler(db))
 	upload.Post("/md", handlers.UploadMdHandler(db))
 	upload.Post("/project", handlers.UploadProjectHandler(db))
+	del := api.Group("/delete")
+	del.Post("/md", handlers.DeleteMdHandler(db))
+	del.Post("/image", handlers.DeleteImageHandler(db))
 
 	// Connecting handlers using the get method
 	app.Get("/", handlers.IndexHandler(db))

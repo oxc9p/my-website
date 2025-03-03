@@ -76,12 +76,33 @@
                     {{range .MarkdownFiles}}
                     <li class="md-element">
                         <a href="{{$.WebLink}}/users/{{$.Username}}/{{.}}">{{.}}</a>
+                        <button class="delete-button" onclick="deleteFile('{{.}}', 'md')">Delete</button>
                     </li>
                     {{end}}
                 </ul>
                 <input type="file" id="upload-md" accept=".md" style="display: none;">
                 <button class="btn small-btn" onclick="document.getElementById('upload-md').click();">Upload New MD File</button>
                 <script>
+                    function deleteFile(fileName, type) {
+                        const formData = new FormData();
+                        formData.append(type, fileName);
+
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', '{{.WebLink}}/api/delete/' + type);
+                        xhr.onload = function() {
+                            if (xhr.status === 200) {
+                                const fileElement = document.querySelector(`li:has(a[href*='${fileName}'])`);
+                                if (fileElement) {
+                                    fileElement.remove();
+                                }
+                                alert('File deleted successfully!');
+                            } else {
+                                alert('Error deleting file.');
+                            }
+                        };
+
+                        xhr.send(formData);
+                    }
                     document.getElementById('upload-md').addEventListener('change', function(event) {
                         const file = event.target.files[0];
                         if (!file) {

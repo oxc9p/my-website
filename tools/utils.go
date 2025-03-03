@@ -100,3 +100,13 @@ func UploadFile(c *fiber.Ctx, user *models.User, formFieldName string, fileInfo 
 
 	return filepath.Join("userfiles", user.Username, fileInfo.FileDir, filename), nil
 }
+
+func DeleteFile(c *fiber.Ctx, user *models.User, formFieldName string) error {
+	file := c.FormValue(formFieldName)
+
+	filePath := filepath.Join("userfiles", user.Username, formFieldName, file)
+	if err := os.Remove(filePath); err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("Error deleting file")
+	}
+	return nil
+}
